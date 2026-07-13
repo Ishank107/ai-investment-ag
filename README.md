@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Investment Analyst
 
-## Getting Started
+A Next.js app that takes a company name, researches it with live news and financial data, and returns an invest-or-pass decision with reasoning.
 
-First, run the development server:
+## What it does
+
+- Accepts a company name from the webpage.
+- Finds the stock ticker symbol.
+- Pulls recent company news from selected finance and business sources.
+- Fetches available Yahoo Finance data for the ticker.
+- Uses Gemini to write a financial analysis and final invest/pass verdict.
+- Shows the company name, reasoning, recent news, and decision on the webpage.
+
+## Tech Stack
+
+- Next.js 16 App Router
+- React 19
+- LangGraph for the research workflow
+- Google Gemini via `@langchain/google-genai`
+- Tavily for recent news search
+- Yahoo Finance for market and company data
+
+## Setup
+
+1. Install dependencies.
+
+```bash
+npm install
+```
+
+2. Add environment variables in `.env.local`.
+
+```bash
+GOOGLE_API_KEY=your_google_gemini_api_key
+TAVILY_API_KEY=your_tavily_api_key
+```
+
+3. Start the development server.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open the app at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How it works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The research flow is handled by the LangGraph pipeline:
 
-## Learn More
+1. Gatherer node
+	- Resolves the ticker.
+	- Fetches recent news.
+	- Fetches Yahoo Finance data.
+2. Analyst node
+	- Produces a written financial analysis.
+3. CIO node
+	- Returns the final verdict: `INVEST` or `PASS`.
 
-To learn more about Next.js, take a look at the following resources:
+The API route at `app/api/invest/route.ts` returns the company name, ticker, recent news, financial analysis, and final report to the frontend.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## News Sources
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Recent news is fetched through Tavily with a news-focused query and a restricted list of business and finance domains, including:
 
-## Deploy on Vercel
+- Reuters
+- CNBC
+- Economic Times
+- Moneycontrol
+- Business Standard
+- Mint
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## UI Output
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The webpage shows:
+
+- Company name
+- Ticker / stock symbol
+- Invest or pass decision
+- Reasoning behind the decision
+- Recent news for the company
+- Financial analysis
+
+## Notes
+
+- If Yahoo Finance cannot find a symbol, the app falls back gracefully instead of failing the entire request.
+- If news is unavailable, the UI shows a company-specific fallback message.
+- The current UI is focused on showing the research result clearly rather than a complex dashboard.
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
